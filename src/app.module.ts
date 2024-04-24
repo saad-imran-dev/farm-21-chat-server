@@ -7,7 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { SocketModule } from './socket/socket.module';
 
 @Module({
-  imports: [ChatModule, ConfigModule.forRoot(), AuthModule, SocketModule],
+  imports: [ChatModule, ConfigModule.forRoot({isGlobal: true,}), AuthModule, SocketModule],
   controllers: [AppController],
   providers: [AppService],
 })
