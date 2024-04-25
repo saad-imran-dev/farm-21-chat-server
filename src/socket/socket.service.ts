@@ -1,19 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { WsException, WsResponse } from '@nestjs/websockets';
 import { AuthService } from 'src/auth/auth.service';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class SocketService {
   private Map: Record<string, string> = {};
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly redisService: RedisService,
+  ) {}
 
   register(client: any) {
     const jwt: any = this.authService.validateClient(
       client.handshake.headers.authorization,
     );
 
-    this.Map[jwt.userId] = client.id;
+    this.redisService.set(jwt.userId, { ...jwt, socketId: client.id });
     client.decoded = jwt;
   }
 
@@ -23,12 +27,12 @@ export class SocketService {
       throw new WsException('user is not registered');
     }
 
-    delete this.Map[userId];
+    this.redisService.remove(userId);
   }
 
   ping(): WsResponse {
     const event = 'pong';
-    const respData = Object.keys(this.Map);
+    const respData = 'Hello World';
     return {
       event,
       data: respData,
