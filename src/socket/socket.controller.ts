@@ -19,7 +19,7 @@ export class SocketController {
     this.service.unRegister(client);
   }
 
-  ping(client: any, data: any): WsResponse {
-    return this.service.ping();
+  ping(client: any, data: any): Promise<WsResponse> {
+    return this.service.ping(client);
   }
 }

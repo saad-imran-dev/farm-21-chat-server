@@ -23,16 +23,13 @@ export class SocketService {
 
   unRegister(client: any) {
     const userId: string = client.decoded.userId;
-    if (!(userId in this.Map)) {
-      throw new WsException('user is not registered');
-    }
-
     this.redisService.remove(userId);
   }
 
-  ping(): WsResponse {
+  async ping(client: any): Promise<WsResponse> {
     const event = 'pong';
-    const respData = 'Hello World';
+    const data = await this.redisService.get(client.decoded.userId);
+    const respData = data.socketId;
     return {
       event,
       data: respData,
