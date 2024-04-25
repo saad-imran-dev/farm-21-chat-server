@@ -7,6 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { SocketController } from './socket.controller';
+import { Events } from 'src/utils/enums/events.enum';
 
 @WebSocketGateway()
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -22,7 +23,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.controller.unRegister(client);
   }
 
-  @SubscribeMessage('ping')
+  @SubscribeMessage(Events.Ping)
   handleMessage(client: any, data: any) {
     return this.controller.ping(client, data);
   }

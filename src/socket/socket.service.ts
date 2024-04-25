@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { WsException, WsResponse } from '@nestjs/websockets';
 import { AuthService } from 'src/auth/auth.service';
 import { RedisService } from 'src/redis/redis.service';
+import { Events } from 'src/utils/enums/events.enum';
 
 @Injectable()
 export class SocketService {
@@ -27,11 +28,10 @@ export class SocketService {
   }
 
   async ping(client: any): Promise<WsResponse> {
-    const event = 'pong';
     const data = await this.redisService.get(client.decoded.userId);
     const respData = data.socketId;
     return {
-      event,
+      event: Events.Pong,
       data: respData,
     };
   }
