@@ -33,9 +33,7 @@ export class RedisService {
   }
 
   async hget(key: string, field: string): Promise<any> {
-    console.log("HGET value")
     const value = await this.client.HGET(key, field);
-    console.log(value)
     return JSON.parse(value);
   }
 
