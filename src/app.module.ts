@@ -7,11 +7,13 @@ import { AuthModule } from './auth/auth.module';
 import { SocketModule } from './socket/socket.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisAsyncOptions } from './utils/configuration/redis.constants';
-import { RedisService } from './redis/redis.service';
 import { RedisModule } from './redis/redis.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { databaseAsyncOptions } from './utils/configuration/database.constants';
 
 @Module({
   imports: [
+    TypeOrmModule.forRootAsync(databaseAsyncOptions),
     CacheModule.registerAsync(redisAsyncOptions),
     ConfigModule.forRoot({ isGlobal: true }),
     ChatModule,
