@@ -27,14 +27,13 @@ export class RedisService {
     await this.client.del(key);
   }
 
-  async hset(key: string, field: string, value: any): Promise<void> {
-    const cacheValue = JSON.stringify(value);
-    await this.client.HSET(key, field, cacheValue);
+  async hset(key: string, field: string, value: string): Promise<void> {
+    await this.client.HSET(key, field, value);
   }
 
   async hget(key: string, field: string): Promise<any> {
     const value = await this.client.HGET(key, field);
-    return JSON.parse(value);
+    return value;
   }
 
   async hdel(key: string, field: string) {

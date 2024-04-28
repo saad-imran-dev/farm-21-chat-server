@@ -3,6 +3,7 @@ import { WsException, WsResponse } from '@nestjs/websockets';
 import { AuthService } from 'src/auth/auth.service';
 import { RedisService } from 'src/redis/redis.service';
 import { Events } from 'src/utils/enums/events.enum';
+import { Fields } from 'src/utils/enums/fields.enum';
 
 @Injectable()
 export class SocketService {
@@ -18,7 +19,7 @@ export class SocketService {
       client.handshake.headers.authorization,
     );
 
-    this.redisService.set(jwt.userId, { ...jwt, socketId: client.id });
+    this.redisService.set(jwt.userId, {[Fields.JWT]: jwt, [Fields.SOCKET_ID]: client.id});
     client.decoded = jwt;
   }
 
@@ -28,11 +29,12 @@ export class SocketService {
   }
 
   async ping(client: any): Promise<WsResponse> {
-    const data = await this.redisService.get(client.decoded.userId);
-    const respData = data.socketId;
+    const data = (await this.redisService.get(client.decoded.userId))[
+      Fields.SOCKET_ID
+    ];
     return {
       event: Events.Pong,
-      data: respData,
+      data,
     };
   }
 }
