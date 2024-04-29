@@ -54,7 +54,7 @@ export class ChatService {
       received: true,
     });
     const chat: Chat = await this.get(chatId);
-    this.repository.save([chat]);
+    await this.repository.save([chat]);
     return chat;
   }
 }
