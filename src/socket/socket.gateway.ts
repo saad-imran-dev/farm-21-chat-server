@@ -24,7 +24,22 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage(Events.Ping)
-  handleMessage(client: any, data: any) {
+  handlePing(client: any, data: any) {
     return this.controller.ping(client, data);
+  }
+
+  @SubscribeMessage(Events.SendMessage)
+  handleSendMessage(client: any, data: any) {
+    return this.controller.message(this.server, client, data);
+  }
+
+  @SubscribeMessage(Events.UnreceivedMessages)
+  handleUnreceivedMessages(client: any, data: any) {
+    return this.controller.unreceivedMessages(client, data);
+  }
+
+  @SubscribeMessage(Events.ReceiveMessage)
+  handleReceiveMessage(client: any, data: any) {
+    return this.controller.receiveMessage(client, data);
   }
 }

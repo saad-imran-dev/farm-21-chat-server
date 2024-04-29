@@ -14,9 +14,9 @@ export class Chat {
   @Column()
   message: string;
 
-  @Column('number', { default: Date.now() })
+  @Column('bigint', { default: Date.now() })
   createdAt: number;
 
-  @Column('boolean', { default: true })
-  recieved: boolean;
+  @Column('boolean', { default: false })
+  received: boolean;
 }
