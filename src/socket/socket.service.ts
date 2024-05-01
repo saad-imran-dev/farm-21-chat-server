@@ -1,14 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { WsException, WsResponse } from '@nestjs/websockets';
-import { from, map, Observable, switchMap } from 'rxjs';
 import { AuthService } from 'src/auth/auth.service';
 import { Chat } from 'src/chat/chat.entity';
 import { ChatService } from 'src/chat/chat.service';
 import { RedisService } from 'src/redis/redis.service';
-import { Events } from 'src/utils/enums/events.enum';
-import { Fields } from 'src/utils/enums/fields.enum';
-import { IWsChatResponse } from './interface/IWsChatResponse';
-import { IWsUnreceivedResponse } from './interface/IWsUnreceivedResponse';
+import { Events } from 'src/shared/enums/events.enum';
+import { Fields } from 'src/shared/enums/fields.enum';
+import { IWsUnreceivedResponse } from '../shared/interface/IWsUnreceivedResponse';
 import { Server } from 'socket.io';
 
 @Injectable()
@@ -21,21 +19,21 @@ export class SocketService {
     private readonly chatService: ChatService,
   ) {}
 
-  register(client: any) {
+  async register(client: any) {
     const jwt: any = this.authService.validateClient(
       client.handshake.headers.authorization,
     );
 
-    this.redisService.set(jwt.userId, {
+    await this.redisService.set(jwt.userId, {
       [Fields.JWT]: jwt,
       [Fields.SOCKET_ID]: client.id,
     });
     client.decoded = jwt;
   }
 
-  unRegister(client: any) {
+  async unRegister(client: any) {
     const userId: string = client.decoded.userId;
-    this.redisService.remove(userId);
+    await this.redisService.remove(userId);
   }
 
   async ping(client: any): Promise<WsResponse> {
@@ -58,7 +56,7 @@ export class SocketService {
       data.receiver,
       data.message,
     );
-    
+
     if (user) {
       server.to(user[Fields.SOCKET_ID]).emit(Events.Message, chat);
     }
@@ -74,7 +72,7 @@ export class SocketService {
     };
   }
 
-  async recieveMessage(client: any, data: any): Promise<void> {
+  async receiveMessage(client: any, data: any): Promise<void> {
     const chat: Chat = await this.chatService.receive(data.chatId);
   }
 }

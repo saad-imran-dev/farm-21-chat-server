@@ -6,40 +6,51 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { SocketController } from './socket.controller';
-import { Events } from 'src/utils/enums/events.enum';
+import { Events } from 'src/shared/enums/events.enum';
+import { UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
+import { WebsocketExceptionsFilter } from 'src/exceptions/all-wsexceptions.filter';
+import { SocketService } from './socket.service';
+import { MessageEventSchema } from 'src/shared/schema/message-event.schema';
+import { ReceiveEventSchema } from 'src/shared/schema/recieve-event-schema';
 
 @WebSocketGateway()
+@UseFilters(WebsocketExceptionsFilter)
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
-  constructor(private controller: SocketController) {}
+  constructor(private service: SocketService) {}
 
-  handleConnection(client: any, ...args: any[]) {
-    this.controller.register(client);
+  async handleConnection(client: any, ...args: any[]) {
+    try {
+      await this.service.register(client);
+    } catch (error) {
+      client.disconnect();
+    }
   }
 
-  handleDisconnect(client: any) {
-    this.controller.unRegister(client);
+  async handleDisconnect(client: any) {
+    await this.service.unRegister(client);
   }
 
   @SubscribeMessage(Events.Ping)
   handlePing(client: any, data: any) {
-    return this.controller.ping(client, data);
+    return this.service.ping(client);
   }
 
+  @UsePipes(new ValidationPipe())
   @SubscribeMessage(Events.SendMessage)
-  handleSendMessage(client: any, data: any) {
-    return this.controller.message(this.server, client, data);
+  handleSendMessage(client: any, data: MessageEventSchema) {
+    return this.service.message(this.server, client, data);
   }
 
   @SubscribeMessage(Events.UnreceivedMessages)
   handleUnreceivedMessages(client: any, data: any) {
-    return this.controller.unreceivedMessages(client, data);
+    return this.service.unreceivedMessages(client);
   }
 
+  @UsePipes(new ValidationPipe())
   @SubscribeMessage(Events.ReceiveMessage)
-  handleReceiveMessage(client: any, data: any) {
-    return this.controller.receiveMessage(client, data);
+  handleReceiveMessage(client: any, data: ReceiveEventSchema) {
+    return this.service.receiveMessage(client, data);
   }
 }
