@@ -58,6 +58,151 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Pre-requisites
+You will require `socket.io` library in the client-side to connect with the server. And also use the `JWT token` generated using api server in the `Authorization` header.  
+
+## Environment Variables
+Without below environment variables the chat server will not start. Use `ENV` vars like this:
+```
+JWT_SECRET_KEY = mysecretkey
+
+REDIS_HOST = localhost
+REDIS_PORT = 6379
+
+DATABASE_TYPE = postgres
+DATABASE_HOST = localhost
+DATABASE_PORT = 5432
+DATABASE_USER = postgres
+DATABASE_PASSWORD = postgres
+DATABASE_DB = postgres
+```
+
+## Schema
+The server uses following schemas in client emit and server response: 
+
+- Chat
+```
+{
+  id: string;
+
+  # user uuid of sender
+  sender: string;
+
+  # user uuid of receiver
+  receiver: string;
+
+  message: string;
+
+  createdAt: number;
+
+  received: boolean;
+}
+```
+
+- MessageEventData
+```
+{
+  # user uuid of receiver
+  receiver: string;
+
+  message: string;
+}
+```
+
+- ReceiveEventData
+```
+{
+  # uuid of chat message
+  chatId: string;
+}
+```
+
+- ErrorResponse
+```
+{
+  # client user uuid
+  id: string;
+
+  message: string;
+}
+```
+
+## Events
+After connecting with the server through `socket.io`, the server and clients will interact by emiting and listening to events. <br>
+**Please check the schema if you don't understand the data field.**
+
+- **ping**: Emitting this event will result in server emitting `pong` in return.
+```
+# client emit 
+{
+  event: "ping",
+  data: undefined
+}
+
+# server response 
+{
+  event: "pong",
+  data: "Hello World!"
+}
+```
+
+- **unreceived messages**: After connecting with server, use this event to get all message sent when client was disconnected. Server will again send array of unreceived chat messages in `unreceived messages` event.
+```
+# client emit 
+{
+  event: "unreceived messages",
+  data: undefined
+}
+
+# server response 
+{
+  event: "unreceived messages",
+  data: Chat[]
+}
+```
+
+- **send message**: Send chat message to a user
+```
+# client emit 
+{
+  event: "send message",
+  data: MessageEventData
+}
+
+# server response to receiver client if client is connected to server
+{
+  event: "message",
+  data: Chat
+}
+```
+
+- **message**: Event emit to receiver to of chat message from `send message` event. Client should the **listening** to this event. 
+```
+# client listening to server 
+{
+  event: "message",
+  data: Chat
+}
+```
+
+- **receive message**: Client sends an `ACK` to server that client has received message.
+```
+# client listening to server 
+{
+  event: "receive message",
+  data: ReceiveEventData
+}
+```
+
+- **error**: Server emits this event when any exception occurs.
+```
+# client listening to server 
+{
+  event: "error",
+  data: ErrorResponse
+}
+```
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
