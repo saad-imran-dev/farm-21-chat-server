@@ -9,11 +9,11 @@ export const redisAsyncOptions: CacheModuleAsyncOptions = {
       socket: {
         host: configService.get<string>('REDIS_HOST'),
         port: parseInt(configService.get<string>('REDIS_PORT')!),
-        tls: true,
+        // tls: true,
       },
-      username: configService.get<string>('REDIS_USER'),
-      password: configService.get<string>('REDIS_PASSWORD'),
-      ttl: 60,
+      // username: configService.get<string>('REDIS_USER'),
+      // password: configService.get<string>('REDIS_PASSWORD'),
+      // ttl: 60,
     });
     return {
       store: () => store,
