@@ -6,4 +6,5 @@ export enum Events {
   SendMessage = 'send message',
   UnreceivedMessages = 'unreceived messages',
   ReceiveMessage = 'receive message',
+  AllMessages = 'all messages',
 }

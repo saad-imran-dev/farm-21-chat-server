@@ -53,4 +53,9 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleReceiveMessage(client: any, data: ReceiveEventSchema) {
     return this.service.receiveMessage(client, data);
   }
+
+  @SubscribeMessage(Events.AllMessages)
+  handleAllMessages(client: any, data: any) {
+    return this.service.allMessages(client);
+  }
 }

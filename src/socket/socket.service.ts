@@ -7,6 +7,7 @@ import { RedisService } from 'src/redis/redis.service';
 import { Events } from 'src/shared/enums/events.enum';
 import { Fields } from 'src/shared/enums/fields.enum';
 import { IWsUnreceivedResponse } from '../shared/interface/IWsUnreceivedResponse';
+import { IWsAllMessagesResponse } from '../shared/interface/IWsAllMessagesResponse';
 import { Server } from 'socket.io';
 
 @Injectable()
@@ -32,8 +33,10 @@ export class SocketService {
   }
 
   async unRegister(client: any) {
-    const userId: string = client.decoded.userId;
-    await this.redisService.remove(userId);
+    if (client.decoded) {
+      const userId: string = client.decoded.userId;
+      await this.redisService.remove(userId);
+    }
   }
 
   async ping(client: any): Promise<WsResponse> {
@@ -73,6 +76,31 @@ export class SocketService {
   }
 
   async receiveMessage(client: any, data: any): Promise<void> {
-    const chat: Chat = await this.chatService.receive(data.chatId);
+    const chat: Chat = await this.chatService.get(data.chatId);
+    if (!chat) throw new WsException('Chat message does not exist');
+    if (client.decoded.userId !== chat.receiver)
+      throw new WsException('Not authorized to receive chat message');
+
+    const receivedChat: Chat = await this.chatService.receive(data.chatId);
+  }
+
+  async allMessages(client: any): Promise<IWsAllMessagesResponse> {
+    const clientId: string = client.decoded.userId;
+    const messages: Chat[] = await this.chatService.getAll(clientId);
+
+    // Group messages according to users
+    let messagesByUser: Record<string, Chat[]> = {};
+    messages.forEach((chat) => {
+      const user: string =
+        chat.sender === clientId ? chat.receiver : chat.sender;
+      user in messagesByUser
+        ? messagesByUser[user].push(chat)
+        : (messagesByUser[user] = [chat]);
+    });
+
+    return {
+      event: Events.AllMessages,
+      data: messagesByUser,
+    };
   }
 }

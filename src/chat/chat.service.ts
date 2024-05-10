@@ -16,9 +16,12 @@ export class ChatService {
     });
   }
 
-  async getAll(sender: string): Promise<Chat[]> {
+  async getAll(user: string): Promise<Chat[]> {
     return this.repository.find({
-      where: { sender },
+      where: [
+        { sender: user },
+        { receiver: user }
+      ],
       order: { createdAt: 'ASC' },
     });
   }
@@ -47,9 +50,6 @@ export class ChatService {
   }
 
   async receive(chatId: string): Promise<Chat> {
-    const chatMessage: Chat = await this.get(chatId);
-    if (!chatMessage) throw new WsException('Chat message does not exist');
-
     const updateResult = await this.repository.update(chatId, {
       received: true,
     });

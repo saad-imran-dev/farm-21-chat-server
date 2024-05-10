@@ -6,14 +6,15 @@ export const redisAsyncOptions: CacheModuleAsyncOptions = {
   isGlobal: true,
   useFactory: async (configService: ConfigService) => {
     const store = await redisStore({
-      socket: {
-        host: configService.get<string>('REDIS_HOST'),
-        port: parseInt(configService.get<string>('REDIS_PORT')!),
-        // tls: true,
-      },
+      // socket: {
+      //   host: configService.get<string>('REDIS_HOST'),
+      //   port: parseInt(configService.get<string>('REDIS_PORT')!),
+      //   tls: true,
+      // },
       // username: configService.get<string>('REDIS_USER'),
       // password: configService.get<string>('REDIS_PASSWORD'),
-      // ttl: 60,
+      url: configService.get<string>('REDIS_URL'),
+      ttl: 60,
     });
     return {
       store: () => store,
