@@ -146,6 +146,21 @@ After connecting with the server through `socket.io`, the server and clients wil
 }
 ```
 
+- **all messages**: After connecting with server, use this event to get all message sent to user.
+```
+# client emit 
+{
+  event: "all messages",
+  data: undefined
+}
+
+# server response 
+{
+  event: "all messages",
+  data: Record<uuid of user, Chat[]>
+}
+```
+
 - **unreceived messages**: After connecting with server, use this event to get all message sent when client was disconnected. Server will again send array of unreceived chat messages in `unreceived messages` event.
 ```
 # client emit 
